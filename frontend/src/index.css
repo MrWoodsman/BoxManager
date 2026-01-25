@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+/* Fix płynności scrolla */
+ion-content {
+  transition: all 0.3s ease-in-out;
+}
+/* Ukrycie paska przewijania (estetyka) */
+::-webkit-scrollbar {
+  display: none;
+}
+
+:root {
+  /* To ustawia domyślne tło dla całej aplikacji w Ionicu */
+  --ion-background-color: #f8f9fa;
+}
+
+/* To zabezpiecza "dziurę" przy przeciąganiu na iOS (overscroll) */
+html,
+body {
+  background-color: #f8f9fa;
+}
