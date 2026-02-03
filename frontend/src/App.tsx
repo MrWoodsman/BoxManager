@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Redirect, Route } from "react-router-dom";
 import {
   IonApp,
@@ -14,67 +15,70 @@ import { IonReactRouter } from "@ionic/react-router";
 /* Ikony */
 import { gridOutline, scanOutline, cubeOutline } from "ionicons/icons";
 
-/* Twoje strony (na razie Dashboard wszędzie, żeby działało) */
+/* Twoje strony */
 import { Dashboard } from "./pages/Dashboard";
+import { Boxes } from "./pages/Boxes";
+import { CameraModal } from "./components/modal/CameraModal";
 
-/* CSS Ionica */
+/* CSS */
 import "@ionic/react/css/core.css";
 import "@ionic/react/css/structure.css";
-/* Twój CSS (Tailwind) */
 import "./index.css";
 
 setupIonicReact();
 
-const App = () => (
-  <IonApp>
-    <IonReactRouter>
-      <IonTabs>
-        {/* --- MIEJSCE GDZIE WYŚWIETLAJĄ SIĘ STRONY --- */}
-        <IonRouterOutlet>
-          {/* Ścieżka do Kokpitu */}
-          <Route exact path="/dashboard">
-            <Dashboard />
-          </Route>
+const App = () => {
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
 
-          {/* Ścieżka do Skanera (na razie Dashboard) */}
-          <Route exact path="/scan">
-            <Dashboard />
-          </Route>
+  return (
+    <IonApp>
+      <IonReactRouter basename="/box-manager">
+        <IonTabs>
+          <IonRouterOutlet>
+            <Route exact path="/dashboard">
+              <Dashboard onOpenScanner={() => setIsScannerOpen(true)} />
+            </Route>
 
-          {/* Ścieżka do Listy Boxów (na razie Dashboard) */}
-          <Route exact path="/boxes">
-            <Dashboard />
-          </Route>
+            <Route exact path="/boxes">
+              <Boxes />
+            </Route>
 
-          {/* Domyślne przekierowanie na start */}
-          <Route exact path="/">
-            <Redirect to="/dashboard" />
-          </Route>
-        </IonRouterOutlet>
+            <Route exact path="/">
+              <Redirect to="/dashboard" />
+            </Route>
+          </IonRouterOutlet>
+          {/* === NAVIGATION === */}
+          <IonTabBar
+            slot="bottom"
+            className="border-t border-gray-200 shadow-sm pb-[env(safe-area-inset-bottom)]"
+          >
+            <IonTabButton tab="dashboard" href="/dashboard">
+              <IonIcon icon={gridOutline} />
+              <IonLabel>Kokpit</IonLabel>
+            </IonTabButton>
 
-        {/* --- DOLNY PASEK MENU (TAB BAR) --- */}
-        <IonTabBar
-          slot="bottom"
-          className="border-t border-gray-200 shadow-sm pb-[env(safe-area-inset-bottom)]"
-        >
-          <IonTabButton tab="dashboard" href="/dashboard">
-            <IonIcon icon={gridOutline} />
-            <IonLabel>Kokpit</IonLabel>
-          </IonTabButton>
+            <IonTabButton
+              tab="scan"
+              onClick={(e) => {
+                e.preventDefault();
+                setIsScannerOpen(true);
+              }}
+            >
+              <IonIcon icon={scanOutline} />
+              <IonLabel>Skanuj</IonLabel>
+            </IonTabButton>
 
-          <IonTabButton tab="scan" href="/scan">
-            <IonIcon icon={scanOutline} />
-            <IonLabel>Skanuj</IonLabel>
-          </IonTabButton>
+            <IonTabButton tab="boxes" href="/boxes">
+              <IonIcon icon={cubeOutline} />
+              <IonLabel>Boxy</IonLabel>
+            </IonTabButton>
+          </IonTabBar>
+        </IonTabs>
+      </IonReactRouter>
 
-          <IonTabButton tab="boxes" href="/boxes">
-            <IonIcon icon={cubeOutline} />
-            <IonLabel>Boxy</IonLabel>
-          </IonTabButton>
-        </IonTabBar>
-      </IonTabs>
-    </IonReactRouter>
-  </IonApp>
-);
+      <CameraModal isOpen={isScannerOpen} onClose={() => setIsScannerOpen(false)} />
+    </IonApp>
+  );
+};
 
 export default App;

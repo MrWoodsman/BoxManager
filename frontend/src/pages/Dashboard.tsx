@@ -1,37 +1,37 @@
 import { IonContent, IonPage, IonIcon } from "@ionic/react";
 import {
-  searchOutline,
   timeOutline,
   flashOutline,
   addOutline,
   qrCodeOutline,
-  // cubeOutline,
-  // homeOutline,
   statsChartOutline,
 } from "ionicons/icons";
+// === COMPONENTS ===
+import { BoxCard } from "../components/BoxCard";
+import { SearchInput } from "../components/SearchInput";
+// === DATA ===
+import { mockBoxes as recentBoxes, mockItems as items, mockRooms as rooms } from "../data/mockData";
 
-export const Dashboard = () => {
+interface DashboardProps {
+  onOpenScanner: () => void;
+}
+
+export const Dashboard = ({ onOpenScanner }: DashboardProps) => {
   // Dane "zaślepiamy" (później podepniesz tu bazę danych)
   const stats = {
-    boxes: 12,
-    items: 135,
-    rooms: 4,
+    boxes: recentBoxes.length,
+    items: items.length,
+    rooms: rooms.length,
   };
-
-  const recentBoxes = [
-    { id: 1, name: "Zimowe Ubrania", location: "Garaż", items: 12, color: "bg-orange-500" },
-    { id: 2, name: "Kable i HDMI", location: "Biuro", items: 8, color: "bg-blue-500" },
-    { id: 3, name: "Dokumenty 2023", location: "Szafa", items: 3, color: "bg-gray-500" },
-  ];
 
   return (
     <IonPage>
       {/* fullscreen pozwala wejść treści pod 'Notch' i zegarek */}
       <IonContent fullscreen className="bg-[#F8F9FA]">
         {/* Główny kontener z bezpiecznym odstępem od góry (Safe Area) */}
-        <div className="flex flex-col min-h-screen px-6 pt-[max(1rem,env(safe-area-inset-top))] pb-24 bg-[#F8F9FA]">
+        <div className="flex flex-col min-h-screen px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-24 bg-[#F8F9FA]">
           {/* --- 1. NAGŁÓWEK + AVATAR --- */}
-          <div className="flex justify-between items-start mt-6 mb-6">
+          <div className="flex justify-between items-start mt-4 mb-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
                 Dzień dobry! 👋
@@ -45,16 +45,7 @@ export const Dashboard = () => {
           </div>
 
           {/* --- 2. WYSZUKIWARKA (Custom Input) --- */}
-          <div className="relative mb-8">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <IonIcon icon={searchOutline} className="text-gray-400 text-xl" />
-            </div>
-            <input
-              type="text"
-              placeholder="Szukaj (np. paszport, kabel...)"
-              className="w-full h-12 pl-12 pr-4 rounded-xl bg-white border border-gray-100 shadow-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all"
-            />
-          </div>
+          <SearchInput />
 
           {/* --- 3. OSTATNIO UŻYWANE (Karuzela) --- */}
           <div className="mb-8">
@@ -66,22 +57,7 @@ export const Dashboard = () => {
             {/* Kontener scrollowania poziomego */}
             <div className="flex gap-4 overflow-x-auto pb-4 -mx-6 px-6 scrollbar-hide snap-x">
               {recentBoxes.map((box) => (
-                <div
-                  key={box.id}
-                  className="min-w-40 bg-white p-4 rounded-2xl shadow-sm border border-gray-100 snap-center active:scale-95 transition-transform"
-                >
-                  <div className="flex items-start gap-2 mb-3">
-                    {/* Kwadracik koloru */}
-                    <div className={`w-3 h-3 rounded-sm ${box.color}`}></div>
-                    <span className="text-[10px] font-bold text-orange-500 uppercase">
-                      BOX #{box.id}
-                    </span>
-                  </div>
-                  <h4 className="font-bold text-gray-900 leading-tight mb-1">{box.name}</h4>
-                  <p className="text-xs text-gray-400">
-                    {box.location} • {box.items} rzeczy
-                  </p>
-                </div>
+                <BoxCard key={box.id} box={box} />
               ))}
             </div>
           </div>
@@ -105,7 +81,10 @@ export const Dashboard = () => {
               </button>
 
               {/* Przycisk SKANUJ (Biały) */}
-              <button className="h-32 bg-white rounded-2xl text-gray-800 flex flex-col justify-center items-center gap-2 shadow-sm border border-gray-100 active:scale-95 transition-transform">
+              <button
+                onClick={onOpenScanner}
+                className="h-32 bg-white rounded-2xl text-gray-800 flex flex-col justify-center items-center gap-2 shadow-sm border border-gray-100 active:scale-95 transition-transform"
+              >
                 <IonIcon icon={qrCodeOutline} className="text-3xl text-gray-900" />
                 <div className="text-center">
                   <span className="block font-bold text-lg">Skanuj</span>
@@ -122,7 +101,7 @@ export const Dashboard = () => {
               <h3 className="text-sm font-bold text-gray-700">Sugestie / Stan</h3>
             </div>
 
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex justify-between divide-x divide-gray-100">
+            <div className="rounded-2xl py-6 px-2 flex justify-between divide-x divide-gray-200">
               <div className="text-center w-1/3">
                 <span className="block text-2xl font-black text-gray-900">{stats.boxes}</span>
                 <span className="text-xs text-gray-400 font-medium">Boxów</span>
