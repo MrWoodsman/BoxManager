@@ -13,8 +13,16 @@ export default function ScannerScreen() {
   if (!permission) return <View style={{ flex: 1, backgroundColor: "white" }} />;
 
   if (!permission.granted) {
-    // ... (kod obsługi braku uprawnień bez zmian)
-    return <View />;
+    return (
+      <View style={[styles.container, { justifyContent: "center" }]}>
+        <Text style={{ textAlign: "center", marginBottom: 20 }}>
+          Potrzebujemy Twojej zgody na użycie aparatu, aby skanować pudełka.
+        </Text>
+        <TouchableOpacity onPress={requestPermission} style={styles.button}>
+          <Text style={styles.buttonText}>Przyznaj dostęp</Text>
+        </TouchableOpacity>
+      </View>
+    );
   }
 
   const handleScanned = ({ data }: { data: string }) => {
