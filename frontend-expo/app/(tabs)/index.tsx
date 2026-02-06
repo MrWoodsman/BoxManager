@@ -1,10 +1,11 @@
-import { Image, StyleSheet, TouchableOpacity, Platform } from "react-native";
+import { Image, StyleSheet, TouchableOpacity, Platform, Text } from "react-native";
 import * as Haptics from "expo-haptics";
 
 import { HelloWave } from "@/components/hello-wave";
 import ParallaxScrollView from "@/components/parallax-scroll-view";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   // Funkcja wyzwalająca wibracje
@@ -15,35 +16,12 @@ export default function HomeScreen() {
   };
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-      headerImage={
-        <Image
-          source={require("@/assets/images/partial-react-logo.png")}
-          style={styles.reactLogo}
-        />
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Moje Pudełka</ThemedText>
-        <HelloWave />
-      </ThemedView>
-
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Przetestuj haptykę:</ThemedText>
-
-        {/* Twój natywny przycisk */}
-        <TouchableOpacity style={styles.boxButton} onPress={handlePress} activeOpacity={0.7}>
-          <ThemedText type="defaultSemiBold" style={{ color: "#fff" }}>
-            📦 Otwórz pudełko
-          </ThemedText>
-        </TouchableOpacity>
-
-        <ThemedText>
-          Dotknij przycisku powyżej, aby poczuć natywną wibrację systemu iOS/Android.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <ThemedView style={{ flex: 1 }}>
+      <SafeAreaView edges={["top"]} style={{ paddingHorizontal: 16, paddingTop: 16 }}>
+        <ThemedText type="title">Dashboard</ThemedText>
+        <Text className="text-oranges">TEST</Text>
+      </SafeAreaView>
+    </ThemedView>
   );
 }
 
