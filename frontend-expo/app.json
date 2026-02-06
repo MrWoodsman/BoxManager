@@ -46,7 +46,9 @@
         {
           "cameraPermission": "Potrzebujemy dostępu do aparatu, aby skanować kody na pudełkach."
         }
-      ]
+      ],
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -1,4 +1,4 @@
-import { Image, StyleSheet, TouchableOpacity, Platform, Text } from "react-native";
+import { Image, StyleSheet, TouchableOpacity, Platform, Text, View } from "react-native";
 import * as Haptics from "expo-haptics";
 
 import { HelloWave } from "@/components/hello-wave";
@@ -6,6 +6,7 @@ import ParallaxScrollView from "@/components/parallax-scroll-view";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { SymbolView } from "expo-symbols";
 
 export default function HomeScreen() {
   // Funkcja wyzwalająca wibracje
@@ -19,45 +20,46 @@ export default function HomeScreen() {
     <ThemedView style={{ flex: 1 }}>
       <SafeAreaView edges={["top"]} style={{ paddingHorizontal: 16, paddingTop: 16 }}>
         <ThemedText type="title">Dashboard</ThemedText>
-        <Text className="text-oranges">TEST</Text>
+
+        {/* SUMMARY CARDS */}
+        <View className="flex-row flex-wrap -mx-2 mt-4">
+          <View className="w-1/2 p-2">
+            <View className="items-center border border-neutral-700 bg-neutral-800 p-4 rounded-lg">
+              <Text className="text-white text-5xl font-bold">32</Text>
+              <Text className="text-white text-center">Pudełka</Text>
+            </View>
+          </View>
+
+          <View className="w-1/2 p-2">
+            <View className="items-center border border-neutral-700 bg-neutral-800 p-4 rounded-lg">
+              <Text className="text-white text-5xl font-bold">262</Text>
+              <Text className="text-white text-center">Przedmioty</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* FAST INFO - EMPTY BOX / ITEMMS WITHOUT BOX */}
+        <View className="flex gap-2 mt-4">
+          <Text className="text-white">Ostrzeżenia</Text>
+          <View className="bg-orange-500/25 border-orange-500/25 border py-2 px-4 rounded-full flex-row items-center gap-1">
+            <SymbolView
+              name="cube.box.fill"
+              tintColor={"#fb923c"}
+              style={{ width: 16, height: 16 }}
+            />
+            <Text className="text-orange-400">
+              Posiadasz <Text className="font-semibold">3</Text> puste pudełka!
+            </Text>
+          </View>
+
+          <View className="bg-orange-500/25 border-orange-500/25 border py-2 px-4 rounded-full flex-row items-center gap-1">
+            <SymbolView name="tag.fill" tintColor={"#fb923c"} style={{ width: 16, height: 16 }} />
+            <Text className="text-orange-400">
+              Masz <Text className="font-semibold">95</Text> nie przypisane przedmioty!
+            </Text>
+          </View>
+        </View>
       </SafeAreaView>
     </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-    paddingHorizontal: 10,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: "absolute",
-  },
-  // Styl dla Twojego przycisku
-  boxButton: {
-    backgroundColor: "#007AFF",
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderRadius: 15,
-    alignItems: "center",
-    justifyContent: "center",
-    marginVertical: 10,
-    // Cień na iOS
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    // Cień na Android
-    elevation: 3,
-  },
-});

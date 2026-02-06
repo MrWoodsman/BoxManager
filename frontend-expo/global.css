@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@theme {
+  --color-brand-orange: #f97316; /* Tu VS Code pokaże kwadracik, który MOŻESZ kliknąć i edytować! */
+}
