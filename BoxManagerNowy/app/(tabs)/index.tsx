@@ -1,0 +1,129 @@
+import {
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Platform,
+  Text,
+  View,
+  ScrollView,
+} from 'react-native';
+import * as Haptics from 'expo-haptics';
+
+import { HelloWave } from '@/components/hello-wave';
+import ParallaxScrollView from '@/components/parallax-scroll-view';
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { Fonts } from '@/constants/theme';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { SymbolView } from 'expo-symbols';
+import { BoxCard } from '@/components/box-card';
+import { useRouter } from 'expo-router';
+import { BOXES_DATA } from '@/constants/data';
+
+export default function HomeScreen() {
+  const router = useRouter();
+  // Funkcja wyzwalająca wibracje
+  const handlePress = () => {
+    // Medium daje fajne, "mięsiste" kliknięcie na iPhone
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
+    console.log('Pudełko dotknięte!');
+  };
+
+  const displayValues = {
+    boxNumber: BOXES_DATA.length,
+    itemNumber: 156,
+    recentBoxes: [...BOXES_DATA]
+      .sort((a, b) => new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime())
+      .slice(0, 5),
+  };
+
+  return (
+    <ThemedView style={{ flex: 1 }} darkColor="#171717">
+      <SafeAreaView edges={['top']} style={{ paddingHorizontal: 16, paddingTop: 16 }}>
+        <View>
+          <ThemedText type="title" style={{ fontFamily: Fonts.rounded }}>
+            Dzień dobry! 🖐️
+          </ThemedText>
+          <Text className="text-xl text-neutral-500">Masz trochę porządkowania?</Text>
+        </View>
+
+        {/* LAST USED BOXES */}
+        <View className="mt-8 flex gap-4">
+          <View className="flex-row items-center gap-2">
+            <SymbolView name="clock" tintColor={'#fb923c'} style={{ width: 20, height: 20 }} />
+            <ThemedText type="subtitle">Ostatnio używane</ThemedText>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-2 flex-row">
+            {displayValues.recentBoxes.map((box) => (
+              <View key={box.id} className="w-[60vw] px-2">
+                <BoxCard id={box.id} name={box.name} location={box.location} />
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* SUMMARY CARDS */}
+        <View className="mt-8 flex gap-4">
+          <View className="flex-row items-center gap-2">
+            <SymbolView name="chart.bar" tintColor={'#fb923c'} style={{ width: 20, height: 20 }} />
+            <ThemedText type="subtitle">Statystyki</ThemedText>
+          </View>
+          <View className="-mx-2 flex-row flex-wrap">
+            <View className="w-1/2 px-2">
+              <View className="items-center rounded-lg border border-neutral-700 bg-neutral-800/50 p-4">
+                <Text className="text-5xl font-bold text-white">{displayValues.boxNumber}</Text>
+                <Text className="text-center text-white">Pudełka</Text>
+              </View>
+            </View>
+
+            <View className="w-1/2 px-2">
+              <View className="items-center rounded-lg border border-neutral-700 bg-neutral-800/50 p-4">
+                <Text className="text-5xl font-bold text-white">{displayValues.itemNumber}</Text>
+                <Text className="text-center text-white">Przedmioty</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* FAST INFO - EMPTY BOX / ITEMMS WITHOUT BOX */}
+        <View className="mt-8 flex gap-4">
+          <View className="flex-row items-center gap-2">
+            <SymbolView
+              name="info.bubble"
+              tintColor={'#fb923c'}
+              style={{ width: 20, height: 20 }}
+            />
+            <ThemedText type="subtitle">Informacje</ThemedText>
+          </View>
+          <View className="flex gap-2">
+            <TouchableOpacity onPress={() => router.push('/empty-boxes')}>
+              <View className="flex-row items-center gap-1 rounded-full border border-orange-500/25 bg-orange-500/25 px-4 py-2">
+                <SymbolView
+                  name="cube.box.fill"
+                  tintColor={'#fb923c'}
+                  style={{ width: 16, height: 16 }}
+                />
+                <Text className="text-orange-400">
+                  Posiadasz <Text className="font-semibold">3</Text> puste pudełka!
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => router.push('/unassigned-items')}>
+              <View className="flex-row items-center gap-1 rounded-full border border-orange-500/25 bg-orange-500/25 px-4 py-2">
+                <SymbolView
+                  name="tag.fill"
+                  tintColor={'#fb923c'}
+                  style={{ width: 16, height: 16 }}
+                />
+                <Text className="text-orange-400">
+                  Masz <Text className="font-semibold">95</Text> nie przypisane przedmioty!
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </SafeAreaView>
+    </ThemedView>
+  );
+}
