@@ -1,6 +1,7 @@
 import { SymbolView } from "expo-symbols";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import * as Haptics from "expo-haptics";
+import { useRouter } from "expo-router";
 
 // Definicja typów dla przejrzystości i podpowiedzi w edytorze
 interface BoxCardProps {
@@ -10,14 +11,25 @@ interface BoxCardProps {
 }
 
 export function BoxCard({ id, name, location }: BoxCardProps) {
+  const router = useRouter();
+
   const handlePress = () => {
     // Wywołuje haptykę – użytkownik "poczuje" kliknięcie w kartę
+    router.push({
+      pathname: "/box/[id]",
+      params: { id: id },
+    });
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     console.log(`Wybrano pudełko: ${id}`);
   };
 
   return (
-    <TouchableOpacity onPress={handlePress} activeOpacity={0.7} style={styles.card}>
+    <TouchableOpacity
+      onPress={handlePress}
+      activeOpacity={0.7}
+      style={styles.card}
+      className="bg-neutral-800/50 border border-neutral-700"
+    >
       {/* GŁÓWNA TREŚĆ (Teksty) */}
       <View style={styles.textContainer}>
         <Text style={styles.nameText}>{name}</Text>
@@ -60,11 +72,8 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#1c1c1e", // Ciemne tło w stylu iOS Dark Mode
     borderRadius: 14,
     padding: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.05)",
   },
   textContainer: {
     flex: 1,

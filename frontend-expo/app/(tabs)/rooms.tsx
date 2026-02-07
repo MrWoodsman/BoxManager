@@ -7,11 +7,14 @@ import { ThemedView } from "@/components/themed-view";
 import { Fonts } from "@/constants/theme";
 import { BoxCard } from "@/components/box-card";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-// DATA SOURCE
-import { BOXES_DATA } from "@/constants/data";
 
 // Przykładowe dane w tablicy
-const DATA = BOXES_DATA;
+const DATA = [
+  { id: "B52A", name: "Wszystko i nic", location: "Salon" },
+  { id: "A6H1", name: "Szafa", location: "Salon" },
+  { id: "HF25", name: "Regał 1", location: "Sypialnia" },
+  { id: "H2M6", name: "Szafka w łazience", location: "Łazienka" },
+];
 
 export default function TabTwoScreen() {
   const [searchQuery, setSearchQuery] = useState("");

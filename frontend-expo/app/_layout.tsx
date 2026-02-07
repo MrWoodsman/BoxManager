@@ -19,6 +19,32 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: "modal", title: "Modal" }} />
+        {/* Te nazwy muszą pasować do Twoich plików w app/ */}
+        <Stack.Screen
+          name="empty-boxes"
+          options={{
+            title: "Puste pudełka",
+            headerBackTitle: "Wstecz",
+            headerBackButtonDisplayMode: "minimal",
+          }}
+        />
+        <Stack.Screen
+          name="unassigned-items"
+          options={{
+            title: "Nieprzypisane",
+            headerBackTitle: "Wstecz",
+            headerBackButtonDisplayMode: "minimal",
+          }}
+        />
+        <Stack.Screen
+          name="box/[id]"
+          options={{
+            title: "Szczegóły",
+            headerBackTitle: "Wstecz",
+            headerBackButtonDisplayMode: "minimal",
+          }}
+        />
+        {/* SKANER */}
         <Stack.Screen
           name="scanner"
           options={{

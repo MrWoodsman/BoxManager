@@ -26,6 +26,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="boxes"
+        options={{
+          title: "Boxes",
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="cube.box.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="scanner-trigger" // Nazwa techniczna, nie musi istnieć w plikach
         options={{
           title: "Skanuj",
@@ -41,10 +48,21 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="boxes"
+        name="rooms"
         options={{
-          title: "Boxes",
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="cube.box.fill" color={color} />,
+          title: "Pokoje",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="door.left.hand.closed" color={color} />
+          ),
+        }}
+      />{" "}
+      <Tabs.Screen
+        name="more"
+        options={{
+          title: "Więcej",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="ellipsis.circle.fill" color={color} />
+          ),
         }}
       />
     </Tabs>
