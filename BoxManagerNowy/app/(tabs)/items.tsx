@@ -7,12 +7,13 @@ import {
   Keyboard,
   ScrollView,
   TextInput,
+  Dimensions, // Potrzebne do ograniczenia wysokości
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   BottomSheetModal,
   BottomSheetBackdrop,
-  BottomSheetScrollView, // 👈
+  BottomSheetScrollView,
   BottomSheetTextInput,
 } from '@gorhom/bottom-sheet';
 
@@ -24,6 +25,8 @@ import { ItemCard } from '@/components/item-card';
 import { BOXES_DATA, ITEMS_DATA } from '@/constants/data';
 import { SymbolView } from 'expo-symbols';
 
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+
 export default function ItemsScreen() {
   const insets = useSafeAreaInsets();
   const bottomSheetRef = useRef<BottomSheetModal>(null);
@@ -33,9 +36,6 @@ export default function ItemsScreen() {
   const [newItem, setNewItem] = useState({ name: '', qty: '1', boxId: '' });
   const [boxSearchQuery, setBoxSearchQuery] = useState('');
   const [showBoxSuggestions, setShowBoxSuggestions] = useState(false);
-
-  // --- SNAP POINTS ---
-  const snapPoints = useMemo(() => ['90%'], []);
 
   // --- FILTROWANIE ---
   const filteredItems = useMemo(
@@ -128,13 +128,14 @@ export default function ItemsScreen() {
       {/* === BOTTOM SHEET === */}
       <BottomSheetModal
         ref={bottomSheetRef}
-        snapPoints={['90%']} // Twój punkt maksymalny
-        enableDynamicSizing={true} // To dodaje "ukryty" punkt startowy dopasowany do treści
-        // --- KONFIGURACJA KLAWIATURY ---
-        keyboardBehavior="extend" // Gdy klawiatura wyjdzie -> rozszerz do 90%
-        keyboardBlurBehavior="restore" // Gdy klawiatura zniknie -> WRÓĆ do dynamicznego rozmiaru
+        // ❌ USUNĄŁEM snapPoints={['90%']} - to był winowajca!
+        enableDynamicSizing={true} // Modal dopasuje się do treści
+        maxDynamicContentSize={SCREEN_HEIGHT * 0.9} // Ale nie urośnie więcej niż 90% ekranu
+        // --- KONFIGURACJA PŁYNNOŚCI ---
+        keyboardBehavior="interactive" // Modal "jeździ" na klawiaturze (góra/dół płynnie)
+        keyboardBlurBehavior="restore"
         android_keyboardInputMode="adjustResize"
-        // -------------------------------
+        // ------------------------------
 
         enablePanDownToClose
         backdropComponent={renderBackdrop}
@@ -143,7 +144,7 @@ export default function ItemsScreen() {
         <BottomSheetScrollView
           contentContainerStyle={[styles.modalContent, { paddingBottom: insets.bottom + 24 }]}
           keyboardShouldPersistTaps="handled">
-          {/* HEADER */}
+          {/* HEADER MODALU */}
           <View className="mb-6 flex-row items-center justify-between">
             <Text className="text-2xl font-bold text-white">Nowy przedmiot</Text>
             <TouchableOpacity onPress={closeSheet}>
@@ -202,7 +203,10 @@ export default function ItemsScreen() {
                           key={box.id}
                           onPress={() => handleSelectBox(box)}
                           className="border-b border-neutral-800 p-4">
-                          <Text className="font-bold text-white">{box.name}</Text>
+                          <View className="flex-row gap-2">
+                            <Text className="font-bold text-white">{box.name}</Text>
+                            <Text className="font-bold text-neutral-600">{box.id}</Text>
+                          </View>
                         </TouchableOpacity>
                       ))}
                     </ScrollView>
@@ -282,6 +286,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#333',
-    maxHeight: 160,
+    maxHeight: 200, // Zwiększyłem trochę, żeby było widać więcej
   },
 });
