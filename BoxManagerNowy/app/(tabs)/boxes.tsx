@@ -1,36 +1,43 @@
-import React, { useState } from "react"; // Dodajemy useState do filtrowania
-import { StyleSheet, View, ScrollView, TextInput } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useState } from 'react'; // Dodajemy useState do filtrowania
+import { StyleSheet, View, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { Fonts } from "@/constants/theme";
-import { BoxCard } from "@/components/box-card";
-import { IconSymbol } from "@/components/ui/icon-symbol";
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { Fonts } from '@/constants/theme';
+import { BoxCard } from '@/components/box-card';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 // DATA SOURCE
-import { BOXES_DATA } from "@/constants/data";
+import { BOXES_DATA } from '@/constants/data';
+import { SymbolView } from 'expo-symbols';
 
 // Przykładowe dane w tablicy
 const DATA = BOXES_DATA;
 
 export default function TabTwoScreen() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Logika filtrowania - sprawdza czy nazwa zawiera wpisany tekst
   const filteredBoxes = DATA.filter((box) =>
-    box.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    box.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <ThemedView style={{ flex: 1 }}>
       {/* === FIXED HEADER (Zawsze na górze) === */}
-      <SafeAreaView edges={["top"]} style={styles.fixedHeader}>
-        <View style={styles.titleContainer}>
+      <SafeAreaView edges={['top']} style={styles.fixedHeader}>
+        <View className=" mb-4 w-full flex-row items-center justify-between pt-2">
           <ThemedText type="title" style={{ fontFamily: Fonts.rounded }}>
-            Wszystkie pudełka
+            Pudełka
           </ThemedText>
-        </View>
 
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => console.log('Dodaj nowy')}
+            className="h-10 w-10 items-center justify-center rounded-full bg-neutral-800">
+            <SymbolView name="plus" size={22} tintColor="white" />
+          </TouchableOpacity>
+        </View>
         {/* PASEK WYSZUKIWANIA */}
         <View style={styles.searchSection}>
           <IconSymbol name="magnifyingglass" size={18} color="#8E8E93" />
@@ -68,16 +75,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 12,
     borderBottomWidth: StyleSheet.hairlineWidth, // Subtelna linia oddzielająca
-    borderBottomColor: "rgba(255,255,255,0.1)",
+    borderBottomColor: 'rgba(255,255,255,0.1)',
   },
   titleContainer: {
     paddingTop: 8,
     marginBottom: 12,
   },
   searchSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(150, 150, 150, 0.15)", // Półprzezroczyste tło w stylu iOS
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(150, 150, 150, 0.15)', // Półprzezroczyste tło w stylu iOS
     borderRadius: 10,
     paddingHorizontal: 12,
     height: 40,
@@ -85,7 +92,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    color: "white", // Dopasuj do motywu (najlepiej użyć koloru z constants)
+    color: 'white', // Dopasuj do motywu (najlepiej użyć koloru z constants)
     fontSize: 16,
   },
   scrollContent: {
@@ -97,7 +104,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   noResults: {
-    textAlign: "center",
+    textAlign: 'center',
     marginTop: 40,
     opacity: 0.5,
   },

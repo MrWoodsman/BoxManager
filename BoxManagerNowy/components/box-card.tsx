@@ -1,7 +1,7 @@
-import { SymbolView } from "expo-symbols";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
+import { SymbolView } from 'expo-symbols';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { useRouter } from 'expo-router';
 
 // Definicja typów dla przejrzystości i podpowiedzi w edytorze
 interface BoxCardProps {
@@ -16,7 +16,7 @@ export function BoxCard({ id, name, location }: BoxCardProps) {
   const handlePress = () => {
     // Wywołuje haptykę – użytkownik "poczuje" kliknięcie w kartę
     router.push({
-      pathname: "/box/[id]",
+      pathname: '/box/[id]',
       params: { id: id },
     });
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -28,32 +28,31 @@ export function BoxCard({ id, name, location }: BoxCardProps) {
       onPress={handlePress}
       activeOpacity={0.7}
       style={styles.card}
-      className="bg-neutral-800/50 border border-neutral-700"
-    >
+      className="border border-neutral-700 bg-neutral-800/50">
       {/* GŁÓWNA TREŚĆ (Teksty) */}
       <View style={styles.textContainer}>
         <Text style={styles.nameText}>{name}</Text>
 
         {/* Rząd z ikonkami i danymi – tu gap zadziała idealnie */}
         <View style={styles.infoRow}>
+          {/* Blok id */}
+          <View style={styles.iconLabelGroup}>
+            <SymbolView
+              name="number"
+              tintColor={'rgba(255, 255, 255, 0.5)'}
+              style={styles.infoIcon}
+            />
+            <Text style={styles.infoText}>{id}</Text>
+          </View>
+
           {/* Blok Lokalizacji */}
           <View style={styles.iconLabelGroup}>
             <SymbolView
               name="mappin.and.ellipse"
-              tintColor={"rgba(255, 255, 255, 0.5)"}
+              tintColor={'rgba(255, 255, 255, 0.5)'}
               style={styles.infoIcon}
             />
             <Text style={styles.infoText}>{location}</Text>
-          </View>
-
-          {/* Opcjonalny drugi blok (np. powtórzona lokalizacja lub inny parametr) */}
-          <View style={styles.iconLabelGroup}>
-            <SymbolView
-              name="number"
-              tintColor={"rgba(255, 255, 255, 0.5)"}
-              style={styles.infoIcon}
-            />
-            <Text style={styles.infoText}>{id}</Text>
           </View>
         </View>
       </View>
@@ -61,7 +60,7 @@ export function BoxCard({ id, name, location }: BoxCardProps) {
       {/* STRZAŁKA PO PRAWEJ STRONIE */}
       <SymbolView
         name="chevron.right"
-        tintColor={"rgba(255, 255, 255, 0.2)"}
+        tintColor={'rgba(255, 255, 255, 0.2)'}
         style={styles.arrowIcon}
       />
     </TouchableOpacity>
@@ -70,8 +69,8 @@ export function BoxCard({ id, name, location }: BoxCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     borderRadius: 14,
     padding: 16,
   },
@@ -80,22 +79,22 @@ const styles = StyleSheet.create({
     gap: 6, // Odstęp między nazwą a rzędem ikon
   },
   nameText: {
-    color: "white",
+    color: 'white',
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: '600',
     letterSpacing: -0.5,
   },
   infoRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 16, // Odstęp między całymi blokami (np. lokalizacja vs kategoria)
   },
   iconLabelGroup: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 4, // ODSTĘP MIĘDZY IKONKĄ A TEKSTEM – teraz na 100% działa
   },
   infoText: {
-    color: "rgba(255, 255, 255, 0.5)",
+    color: 'rgba(255, 255, 255, 0.5)',
     fontSize: 13,
   },
   infoIcon: {

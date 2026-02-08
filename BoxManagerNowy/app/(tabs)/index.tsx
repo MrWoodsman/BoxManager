@@ -18,7 +18,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { SymbolView } from 'expo-symbols';
 import { BoxCard } from '@/components/box-card';
 import { useRouter } from 'expo-router';
-import { BOXES_DATA } from '@/constants/data';
+import { BOXES_DATA, ITEMS_DATA } from '@/constants/data';
+import { getEmptyBoxes, getUnassignedItems } from '@/utils/dataHelpers';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -29,9 +30,12 @@ export default function HomeScreen() {
     console.log('Pudełko dotknięte!');
   };
 
+  const UnassignedItems = getUnassignedItems().length;
+  const EmptyBoxes = getEmptyBoxes().length;
+
   const displayValues = {
     boxNumber: BOXES_DATA.length,
-    itemNumber: 156,
+    itemNumber: ITEMS_DATA.length,
     recentBoxes: [...BOXES_DATA]
       .sort((a, b) => new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime())
       .slice(0, 5),
@@ -96,31 +100,35 @@ export default function HomeScreen() {
             <ThemedText type="subtitle">Informacje</ThemedText>
           </View>
           <View className="flex gap-2">
-            <TouchableOpacity onPress={() => router.push('/empty-boxes')}>
-              <View className="flex-row items-center gap-1 rounded-full border border-orange-500/25 bg-orange-500/25 px-4 py-2">
-                <SymbolView
-                  name="cube.box.fill"
-                  tintColor={'#fb923c'}
-                  style={{ width: 16, height: 16 }}
-                />
-                <Text className="text-orange-400">
-                  Posiadasz <Text className="font-semibold">3</Text> puste pudełka!
-                </Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => router.push('/unassigned-items')}>
-              <View className="flex-row items-center gap-1 rounded-full border border-orange-500/25 bg-orange-500/25 px-4 py-2">
-                <SymbolView
-                  name="tag.fill"
-                  tintColor={'#fb923c'}
-                  style={{ width: 16, height: 16 }}
-                />
-                <Text className="text-orange-400">
-                  Masz <Text className="font-semibold">95</Text> nie przypisane przedmioty!
-                </Text>
-              </View>
-            </TouchableOpacity>
+            {EmptyBoxes > 0 && (
+              <TouchableOpacity onPress={() => router.push('/empty-boxes')}>
+                <View className="flex-row items-center gap-1 rounded-full border border-orange-500/25 bg-orange-500/25 px-4 py-2">
+                  <SymbolView
+                    name="cube.box.fill"
+                    tintColor={'#fb923c'}
+                    style={{ width: 16, height: 16 }}
+                  />
+                  <Text className="text-orange-400">
+                    Posiadasz <Text className="font-semibold">{EmptyBoxes}</Text> puste pudełka!
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            )}
+            {UnassignedItems > 0 && (
+              <TouchableOpacity onPress={() => router.push('/unassigned-items')}>
+                <View className="flex-row items-center gap-1 rounded-full border border-orange-500/25 bg-orange-500/25 px-4 py-2">
+                  <SymbolView
+                    name="tag.fill"
+                    tintColor={'#fb923c'}
+                    style={{ width: 16, height: 16 }}
+                  />
+                  <Text className="text-orange-400">
+                    Masz <Text className="font-semibold">{UnassignedItems}</Text> nie przypisane
+                    przedmioty!
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </SafeAreaView>
