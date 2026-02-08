@@ -52,7 +52,7 @@ export default function TabLayout() {
           title: 'Przedmioty',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="tag.fill" color={color} />,
         }}
-      />{' '}
+      />
       <Tabs.Screen
         name="more"
         options={{

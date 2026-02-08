@@ -1,18 +1,20 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
 import {
   StyleSheet,
   View,
+  TouchableOpacity,
+  Text,
+  Keyboard,
   ScrollView,
   TextInput,
-  TouchableOpacity,
-  Modal,
-  Text,
-  KeyboardAvoidingView,
-  TouchableWithoutFeedback,
-  Keyboard,
-  Platform,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  BottomSheetModal,
+  BottomSheetBackdrop,
+  BottomSheetScrollView, // 👈
+  BottomSheetTextInput,
+} from '@gorhom/bottom-sheet';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -23,33 +25,41 @@ import { BOXES_DATA, ITEMS_DATA } from '@/constants/data';
 import { SymbolView } from 'expo-symbols';
 
 export default function ItemsScreen() {
+  const insets = useSafeAreaInsets();
+  const bottomSheetRef = useRef<BottomSheetModal>(null);
+
   // --- STANY ---
   const [searchQuery, setSearchQuery] = useState('');
-  const [isModalVisible, setModalVisible] = useState(false);
-
   const [newItem, setNewItem] = useState({ name: '', qty: '1', boxId: '' });
   const [boxSearchQuery, setBoxSearchQuery] = useState('');
   const [showBoxSuggestions, setShowBoxSuggestions] = useState(false);
 
-  // --- LOGIKA FILTROWANIA ---
-  // Filtrowanie głównej listy przedmiotów
+  // --- SNAP POINTS ---
+  const snapPoints = useMemo(() => ['90%'], []);
+
+  // --- FILTROWANIE ---
   const filteredItems = useMemo(
-    () => ITEMS_DATA.filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase())),
+    () => ITEMS_DATA.filter((i) => i.name.toLowerCase().includes(searchQuery.toLowerCase())),
     [searchQuery]
   );
 
-  // Filtrowanie podpowiedzi pudełek w modalu
   const filteredBoxes = useMemo(
     () =>
       BOXES_DATA.filter(
-        (box) =>
-          box.name.toLowerCase().includes(boxSearchQuery.toLowerCase()) ||
-          box.id.toLowerCase().includes(boxSearchQuery.toLowerCase())
+        (b) =>
+          b.name.toLowerCase().includes(boxSearchQuery.toLowerCase()) ||
+          b.id.toLowerCase().includes(boxSearchQuery.toLowerCase())
       ),
     [boxSearchQuery]
   );
 
-  // Wybór pudełka z listy podpowiedzi
+  // --- AKCJE ---
+  const openSheet = useCallback(() => bottomSheetRef.current?.present(), []);
+  const closeSheet = useCallback(() => {
+    bottomSheetRef.current?.dismiss();
+    Keyboard.dismiss();
+  }, []);
+
   const handleSelectBox = (box: (typeof BOXES_DATA)[0]) => {
     setNewItem({ ...newItem, boxId: box.id });
     setBoxSearchQuery(box.name);
@@ -57,24 +67,36 @@ export default function ItemsScreen() {
     Keyboard.dismiss();
   };
 
+  // --- BACKDROP ---
+  const renderBackdrop = useCallback(
+    (props: any) => (
+      <BottomSheetBackdrop
+        {...props}
+        appearsOnIndex={0}
+        disappearsOnIndex={-1}
+        pressBehavior="close"
+        opacity={0.6}
+      />
+    ),
+    []
+  );
+
   return (
     <ThemedView style={{ flex: 1 }}>
-      {/* === NAGŁÓWEK === */}
+      {/* === HEADER === */}
       <SafeAreaView edges={['top']} style={styles.fixedHeader}>
-        <View className="mb-4 w-full flex-row items-center justify-between pt-2">
+        <View className="mb-4 flex-row items-center justify-between pt-2">
           <ThemedText type="title" style={{ fontFamily: Fonts.rounded }}>
             Przedmioty
           </ThemedText>
 
           <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => setModalVisible(true)}
-            className="h-10 w-10 items-center justify-center rounded-full bg-neutral-800">
-            <SymbolView name="plus" size={22} tintColor="white" />
+            onPress={openSheet}
+            className="h-11 w-11 items-center justify-center rounded-full bg-neutral-800">
+            <SymbolView name="plus" size={24} tintColor="white" />
           </TouchableOpacity>
         </View>
 
-        {/* PASEK WYSZUKIWANIA */}
         <View style={styles.searchSection}>
           <IconSymbol name="magnifyingglass" size={18} color="#8E8E93" />
           <TextInput
@@ -87,177 +109,179 @@ export default function ItemsScreen() {
         </View>
       </SafeAreaView>
 
-      {/* === LISTA PRZEDMIOTÓW === */}
-      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-        <View style={styles.cardsGap}>
-          {filteredItems.length > 0 ? (
-            filteredItems.map((item) => (
-              <ItemCard
-                key={item.id}
-                id={item.id}
-                name={item.name}
-                // Szukamy nazwy pudełka po ID
-                location={BOXES_DATA.find((box) => box.id === item.boxId)?.name || 'Nieprzypisane'}
-              />
-            ))
-          ) : (
-            <ThemedText style={styles.noResults}>Brak przedmiotów o tej nazwie...</ThemedText>
-          )}
+      {/* === LISTA === */}
+      <ScrollView
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 80 }]}
+        keyboardShouldPersistTaps="handled">
+        <View style={{ gap: 12 }}>
+          {filteredItems.map((item) => (
+            <ItemCard
+              key={item.id}
+              id={item.id}
+              name={item.name}
+              location={BOXES_DATA.find((b) => b.id === item.boxId)?.name || 'Nieprzypisane'}
+            />
+          ))}
         </View>
       </ScrollView>
 
-      {/* === MODAL DODAWANIA === */}
-      <Modal
-        animationType="fade" // Fade jest kluczowy dla płynności tła
-        transparent={true}
-        visible={isModalVisible}
-        onRequestClose={() => setModalVisible(false)}>
-        {/* Kontener główny - NIE przesuwamy go przez KeyboardAvoidingView */}
-        <View className="flex-1 justify-end">
-          {/* Backdrop (Tło zamykające) - Statyczne, nie rusza się */}
-          <TouchableWithoutFeedback
-            onPress={() => {
-              Keyboard.dismiss();
-              setModalVisible(false);
-              setShowBoxSuggestions(false);
-            }}>
-            <View style={StyleSheet.absoluteFillObject} className="bg-black/60" />
-          </TouchableWithoutFeedback>
+      {/* === BOTTOM SHEET === */}
+      <BottomSheetModal
+        ref={bottomSheetRef}
+        snapPoints={['90%']} // Twój punkt maksymalny
+        enableDynamicSizing={true} // To dodaje "ukryty" punkt startowy dopasowany do treści
+        // --- KONFIGURACJA KLAWIATURY ---
+        keyboardBehavior="extend" // Gdy klawiatura wyjdzie -> rozszerz do 90%
+        keyboardBlurBehavior="restore" // Gdy klawiatura zniknie -> WRÓĆ do dynamicznego rozmiaru
+        android_keyboardInputMode="adjustResize"
+        // -------------------------------
 
-          {/* TYLKO TO SIĘ RUSZA - KeyboardAvoidingView owija tylko biały box */}
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            // Usunęliśmy ujemny offset, który mógł powodować skakanie
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
-            <View
-              style={{ backgroundColor: '#171717' }}
-              className="rounded-t-[30px] border-t border-neutral-800 p-6 pb-12">
-              {/* Pasek do ciągnięcia */}
-              <View className="mb-6 h-1.5 w-12 self-center rounded-full bg-neutral-700" />
+        enablePanDownToClose
+        backdropComponent={renderBackdrop}
+        topInset={insets.top}
+        backgroundStyle={{ backgroundColor: '#171717', borderRadius: 32 }}>
+        <BottomSheetScrollView
+          contentContainerStyle={[styles.modalContent, { paddingBottom: insets.bottom + 24 }]}
+          keyboardShouldPersistTaps="handled">
+          {/* HEADER */}
+          <View className="mb-6 flex-row items-center justify-between">
+            <Text className="text-2xl font-bold text-white">Nowy przedmiot</Text>
+            <TouchableOpacity onPress={closeSheet}>
+              <SymbolView name="xmark.circle.fill" size={28} tintColor="#333" />
+            </TouchableOpacity>
+          </View>
 
-              <View className="mb-6 flex-row items-center justify-between">
-                <Text className="text-2xl font-bold text-white">Nowy przedmiot</Text>
-                <TouchableOpacity onPress={() => setModalVisible(false)}>
-                  <Text className="text-lg text-neutral-400">Anuluj</Text>
-                </TouchableOpacity>
-              </View>
-
-              <View className="gap-y-4">
-                {/* Nazwa */}
-                <View>
-                  <Text className="mb-2 ml-1 text-neutral-400">Nazwa przedmiotu</Text>
-                  <TextInput
-                    className="rounded-2xl bg-neutral-800 p-4 text-lg text-white"
-                    placeholder="np. Taśma klejąca"
-                    placeholderTextColor="#555"
-                    value={newItem.name}
-                    onChangeText={(t) => setNewItem({ ...newItem, name: t })}
-                  />
-                </View>
-
-                {/* Ilość i Pudełko */}
-                <View className="z-50 flex-row gap-x-4">
-                  <View className="flex-1">
-                    <Text className="mb-2 ml-1 text-neutral-400">Ilość</Text>
-                    <TextInput
-                      keyboardType="numeric"
-                      className="rounded-2xl bg-neutral-800 p-4 text-center text-lg text-white"
-                      value={newItem.qty}
-                      onChangeText={(t) => setNewItem({ ...newItem, qty: t })}
-                    />
-                  </View>
-
-                  <View className="relative flex-[2]">
-                    <Text className="mb-2 ml-1 text-neutral-400">Pudełko</Text>
-                    <View className="h-[60px] flex-row items-center rounded-2xl bg-neutral-800 pr-4">
-                      <TextInput
-                        className="flex-1 p-4 text-lg text-white"
-                        placeholder="Szukaj..."
-                        placeholderTextColor="#555"
-                        value={boxSearchQuery}
-                        onFocus={() => setShowBoxSuggestions(true)}
-                        onChangeText={(t) => {
-                          setBoxSearchQuery(t);
-                          setShowBoxSuggestions(true);
-                        }}
-                      />
-                      <TouchableOpacity onPress={() => console.log('Otwórz skaner')}>
-                        <SymbolView name="qrcode.viewfinder" size={24} tintColor="#3b82f6" />
-                      </TouchableOpacity>
-                    </View>
-
-                    {/* ABSOLUTNE PODPOWIEDZI */}
-                    {showBoxSuggestions && boxSearchQuery.length > 0 && (
-                      <View
-                        style={{ top: 85, left: 0, right: 0, position: 'absolute', zIndex: 1000 }}
-                        className="max-h-40 overflow-hidden rounded-2xl border border-neutral-700 bg-neutral-800 shadow-2xl shadow-black">
-                        <ScrollView keyboardShouldPersistTaps="always">
-                          {filteredBoxes.map((box) => (
-                            <TouchableOpacity
-                              key={box.id}
-                              onPress={() => handleSelectBox(box)}
-                              className="border-b border-neutral-700 p-4 active:bg-neutral-700">
-                              <Text className="font-medium text-white">{box.name}</Text>
-                              <Text className="text-xs text-neutral-500">{box.location}</Text>
-                            </TouchableOpacity>
-                          ))}
-                        </ScrollView>
-                      </View>
-                    )}
-                  </View>
-                </View>
-              </View>
-
-              <TouchableOpacity
-                className="mt-8 items-center rounded-2xl bg-blue-600 p-4 shadow-lg shadow-blue-500/50"
-                onPress={() => {
-                  console.log('Zapisano:', { ...newItem, boxName: boxSearchQuery });
-                  setModalVisible(false);
-                  setBoxSearchQuery('');
-                  setNewItem({ name: '', qty: '1', boxId: '' });
-                }}>
-                <Text className="text-lg font-bold text-white">Dodaj do spisu</Text>
-              </TouchableOpacity>
+          {/* INPUTY */}
+          <View style={{ gap: 20 }}>
+            <View>
+              <Text style={styles.label}>Nazwa</Text>
+              <BottomSheetTextInput
+                style={styles.input}
+                placeholder="Co dodajesz?"
+                placeholderTextColor="#555"
+                value={newItem.name}
+                onChangeText={(t) => setNewItem({ ...newItem, name: t })}
+              />
             </View>
-          </KeyboardAvoidingView>
-        </View>
-      </Modal>
+
+            <View className="flex-row" style={{ gap: 16 }}>
+              <View className="flex-1">
+                <Text style={styles.label}>Ilość</Text>
+                <BottomSheetTextInput
+                  style={[styles.input, { textAlign: 'center' }]}
+                  keyboardType="numeric"
+                  value={newItem.qty}
+                  onChangeText={(t) => setNewItem({ ...newItem, qty: t })}
+                />
+              </View>
+
+              <View className="relative flex-[2]">
+                <Text style={styles.label}>Pudełko</Text>
+
+                <View style={[styles.input, { flexDirection: 'row', alignItems: 'center' }]}>
+                  <BottomSheetTextInput
+                    style={{ flex: 1, color: 'white', fontSize: 18 }}
+                    placeholder="Szukaj..."
+                    placeholderTextColor="#555"
+                    value={boxSearchQuery}
+                    onFocus={() => setShowBoxSuggestions(true)}
+                    onChangeText={(t) => {
+                      setBoxSearchQuery(t);
+                      setShowBoxSuggestions(true);
+                    }}
+                  />
+
+                  <SymbolView name="qrcode.viewfinder" size={24} tintColor="#3b82f6" />
+                </View>
+
+                {showBoxSuggestions && boxSearchQuery.length > 0 && (
+                  <View style={styles.suggestions}>
+                    <ScrollView keyboardShouldPersistTaps="always">
+                      {filteredBoxes.map((box) => (
+                        <TouchableOpacity
+                          key={box.id}
+                          onPress={() => handleSelectBox(box)}
+                          className="border-b border-neutral-800 p-4">
+                          <Text className="font-bold text-white">{box.name}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </View>
+                )}
+              </View>
+            </View>
+          </View>
+
+          {/* BUTTON */}
+          <TouchableOpacity
+            className="mt-8 items-center rounded-2xl bg-blue-600 p-4"
+            onPress={() => {
+              console.log('Dodano:', newItem);
+              closeSheet();
+            }}>
+            <Text className="text-lg font-bold text-white">Dodaj do spisu</Text>
+          </TouchableOpacity>
+        </BottomSheetScrollView>
+      </BottomSheetModal>
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   fixedHeader: {
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
+    paddingHorizontal: 20,
+    paddingBottom: 16,
   },
   searchSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(150, 150, 150, 0.15)',
-    borderRadius: 10,
+    backgroundColor: 'rgba(150,150,150,0.15)',
+    borderRadius: 12,
     paddingHorizontal: 12,
-    height: 40,
-    gap: 8,
+    height: 44,
+    gap: 10,
   },
   searchInput: {
     flex: 1,
     color: 'white',
-    fontSize: 16,
+    fontSize: 17,
   },
   scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+  },
+  modalContent: {
+    paddingHorizontal: 24,
+    paddingTop: 8,
+  },
+  label: {
+    marginBottom: 6,
+    marginLeft: 4,
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#888',
+    textTransform: 'uppercase',
+  },
+  input: {
+    backgroundColor: '#262626',
+    color: 'white',
     paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 40,
+    borderRadius: 16,
+    fontSize: 18,
+    height: 58,
   },
-  cardsGap: {
-    gap: 12,
-  },
-  noResults: {
-    textAlign: 'center',
-    marginTop: 40,
-    opacity: 0.5,
+  suggestions: {
+    position: 'absolute',
+    top: 82,
+    left: 0,
+    right: 0,
+    backgroundColor: '#1c1c1e',
+    borderRadius: 16,
+    zIndex: 1000,
+    elevation: 20,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#333',
+    maxHeight: 160,
   },
 });
